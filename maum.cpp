@@ -1,9 +1,13 @@
-#include <iostream>
+ #include <iostream>
 
 using namespace std;
 
 
-struct CreateCard{
+
+// Estrutura da carta
+
+
+struct CreateCard{;
 		
 	char card[2];
 		
@@ -24,6 +28,12 @@ struct CreateCard{
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// Nó para criar carta
 
 
 class Node{
@@ -51,6 +61,13 @@ void Node::removeNode(Node* nd){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// Criador de monte
+
 
 class CreateBunch{
 	
@@ -105,6 +122,12 @@ CreateCard CreateBunch::Top(){
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+
+// Criador de monte para cada player
+
+
 class BunchPlayer{
 	Node* top;
 	int tam;
@@ -115,6 +138,7 @@ class BunchPlayer{
 		bool push(CreateCard card);
 		void pop();
 		int size();
+		CreateCard Top();
 	
 };
 
@@ -129,11 +153,15 @@ bool BunchPlayer::push(CreateCard card){
 	
 	if(node){
 		node->next = top;
-		top = noode;
+		top = node;
 		tam++;
 		return true;
 	}
 	return false;
+}
+
+int BunchPlayer::size(){
+	return tam;
 }
 
 void BunchPlayer::pop(){
@@ -144,11 +172,19 @@ void BunchPlayer::pop(){
 		tam--;
 	}
 }
+
+CreateCard BunchPlayer::Top(){
+	return top->card;
+}
+
+
+
 	
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
 
+// Nó para lista circular para rotacionar o jogo
 
 class NodeListD{
 	public:
@@ -162,7 +198,7 @@ class NodeListD{
 };
 
 NodeListD* NodeListD::createNodeListD(BunchPlayer BunchP){
-	NodeListD NdLD = new NodeListD;
+	NodeListD* NdLD = new NodeListD;
 	if(NdLD){
 		NdLD->next = NdLD->prev = 0;
 		NdLD->Bp = BunchP;
@@ -176,6 +212,13 @@ void NodeListD::removeNodeListD(NodeListD* NdLD){
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+/////
+
+
+
+
+
+// class Player é uma lista circular para rotacionar o jogo, para cada vez de cada player.
 
 class Players{
 	NodeListD* head;
@@ -264,14 +307,23 @@ bool Players::itMM(){
 
 int main(){
 	
-	CreateBunch Bunch[3];
-	CreateCard card;
+	CreateBunch Bunch[3]; // criar montes para embaralhar cartas //Posição 0 e 1 são montes para embaralhar, quanto posição 2 é monte principal
+	CreateCard card; // criador de cartas
 	
-	char cardChar;
+	char cardChar; //criador de tipo da carta
 	int full = 0, j = 1;
 	
 	
+	int Qplayers, QRounds = 0;
 	
+	cin>>QRounds;
+	
+	do{
+		cin>>Qplayers;
+	
+	}while(Qplayers < 2 || Qplayers > 10);
+	
+	//montar cartas para embaralhar
 	while(full < 104){
 		
 			for(int i = 0; i < 2; i++){
@@ -286,6 +338,7 @@ int main(){
 	}
 	
 	
+	//Embaralhar cartas no monte
 	while(Bunch[0].size() != 0 || Bunch[1].size() != 0){
 		
 		if(Bunch[0].size() != 0){
@@ -297,16 +350,39 @@ int main(){
 			Bunch[1].pop();
 		}
 		
+		
+	//Bunch[2]: Bunch da posição 2 é monte princial aonde foi embaralhado todas cartas
+		
+
+	cout<<"carta foiadicionado ao monte. Tamanho:["<<Bunch[2].size()<<"]: "<<Bunch[2].Top().GetCard()<<Bunch[2].Top().GetValue()<<endl;
+	
 	}
+	cout<<"\n\n\n";
+	
+	
+	
+	
+	// Criador de monte dos players
+	BunchPlayer PlayerBunch[Qplayers]; //(Qplayers): Quantidade de players. (PlayerBunch): são monte de cada player
+	
+	
+	// Distribuindo cartas do monte main para cada player.
+	for(int i = 0; i < Qplayers; i++){
+		
+		while(PlayerBunch[i].size() < 5){
+			PlayerBunch[i].push(Bunch[2].Top());
+			Bunch[2].pop();
+		}
+		
+		
+	}
+	cout<<"\nTamanho da monte: "<<Bunch[2].size()<<endl;
 	
 	
 	
 	
 	
-	
-	
-	
-	
+	Players gameRotation[Qplayers];
 	
 	
 	
