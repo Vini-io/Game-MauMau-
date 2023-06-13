@@ -20,42 +20,42 @@ struct CreateCard{;
 		this->card[i] = cd;
 		
 		if(cd == 'A'){
-			points = points + 1;
+			points = 1;
 		}else if(cd == 'B'){
-			points = points + 2;
+			points = 2;
 		
 		}else if(cd == 'C'){
-			points = points + 3;
+			points = 3;
 		
 		}else if(cd == 'D'){
-			points = points + 4;
+			points = 4;
 		
 		}else if(cd == 'E'){
-			points = points + 5;
+			points = 5;
 		
 		}else if(cd == 'F'){
-			points = points + 6;
+			points = 6;
 		
 		}else if(cd == 'G'){
-			points = points + 7;
+			points = 7;
 		
 		}else if(cd == 'H'){
-			points = points + 8;
+			points = 8;
 		
 		}else if(cd == 'I'){
-			points = points + 9;
+			points = 9;
 		
 		}else if(cd == 'J'){
-			points = points + 10;
+			points = 10;
 		
 		}else if(cd == 'K'){
-			points = points + 11;
+			points = 11;
 		
 		}else if(cd == 'L'){
-			points = points + 12;
+			points = 12;
 		
 		}else if(cd == 'M'){
-			points = points + 13;
+			points = 13;
 		}
 		
 	}
@@ -202,6 +202,7 @@ void NodeListBunchPlayer::removeNodeListD(NodeListBunchPlayer* NdLD){
 class BunchPlayer{
 	NodeListBunchPlayer* head;
 	NodeListBunchPlayer* it;
+	NodeListBunchPlayer** toIt;
 	int tam;
 	
 	public:
@@ -212,6 +213,7 @@ class BunchPlayer{
 		bool itPP();
 		bool itMM();
 		int size();
+		bool hasIt();
 		CreateCard pointedIt();
 	
 };
@@ -220,6 +222,11 @@ class BunchPlayer{
 BunchPlayer::BunchPlayer(){
 	head = it = 0;
 	tam = 0;
+}
+
+bool BunchPlayer::hasIt(){
+	if(*toIt == it) return true;
+	return false;
 }
 
 int BunchPlayer::size(){
@@ -247,6 +254,7 @@ bool BunchPlayer::insertNext(CreateCard cd){
 		}
 		if(NdListBunchPlayer->cd.points > it->cd.points){
 			it = NdListBunchPlayer;
+			toIt = &it;
 		}
 		tam++;
 	return true;
@@ -281,6 +289,7 @@ bool BunchPlayer::Erase(){ // ***************************** verificar exclusão 
 			
 			if(itAux->cd.points > it->cd.points){
 				it = itAux;
+				toIt = &it;
 			}
 			
 		}
@@ -385,13 +394,15 @@ bool Players::insertNext(BunchPlayer Bp){
 	if(NdListD){
 		if(!head){
 			it = head = NdListD;
-		
+			it->prev = it->next = NdListD;
 		}else{
-			it->next = NdListD;
+			
+			
+			(it->next)->prev = NdListD;
+			NdListD->next = it->next;
 			NdListD->prev = it;
+			it->next = NdListD;
 			it = NdListD;
-			NdListD->next = head;
-			head->prev = NdListD;
 		}
 		tam++;
 	return true;
@@ -409,15 +420,14 @@ bool Players::Erase(){
 			
 			(it->prev)->next = it->next;
 			(it->next)->prev = it->prev;
-			it = it->next;
-			head = it;
+			head = it->next;
 			NodeListD::removeNodeListD(itAux);
 		}else{
 			(it->prev)->next = it->next;
 			(it->next)->prev = it->prev;
-			it = it->next;
 			NodeListD::removeNodeListD(itAux);
 		}
+		it = it->next;
 		tam--;
 		return true;
 	}
@@ -493,7 +503,7 @@ int main(){
 	//Bunch[2]: Bunch da posição 2 é monte princial aonde foi embaralhado todas cartas
 		
 
-	//cout<<"carta foiadicionado ao monte. Tamanho:["<<Bunch[2].size()<<"]: "<<Bunch[2].Top().GetCard()<<Bunch[2].Top().GetValue()<<endl;
+//	cout<<"carta foi adicionado ao monte. Tamanho:["<<Bunch[2].size()<<"]: "<<Bunch[2].Top().GetCard()<<Bunch[2].Top().GetValue()<<endl;
 	
 	}
 	//cout<<"\n\n\n";
@@ -528,42 +538,206 @@ int main(){
 	// lixo é mesa do jogo, aonde vai ser jogada as cartas dos players
 	CreateBunch lixo;
 	
-	int turnPlayer = Qplayers - 1;
+	bool cardToLixo, wayGame, NextToNext, buyCard2, buyCard3;
 	
-	
-//	cout<<"vez: "<<turnPlayer;
-	
-	
+
 	for(int i = 0; i < Qmatch; i++){ // quantidade de partidas
 		
+		while(){ // rodadas
+			
 		gameRotation.begin();
 		
-		turnPlayer = (turnPlayer + 1) % Qplayers; // qual vez do jogador
+		while(){ // rotação das cartas
 		
+		/*
+		if(gameRotation.pointedIt().size() == 0){
+			gameRotation.Erase();
+		}
+		*/
 		
-		while(false){ // rodadas
+			cardToLixo = false;
 			
 				if(lixo.size() == 0){ // rodada acabou de começar!
 					lixo.push(gameRotation.pointedIt().pointedIt()); // adicionar carta de tal player no lixo
 					gameRotation.pointedIt().Erase();// remove carta do player
 					cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+					cardToLixo = true;
 				}else{
 					
+					do{
+						
+						if(lixo.Top().GetValue() == gameRotation.pointedIt().pointedIt().GetValue() || lixo.Top().GetCard() == gameRotation.pointedIt().pointedIt().GetCard()){
+						
+							lixo.push(gameRotation.pointedIt().pointedIt());
+							cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+							cardToLixo = true;
+						}else
+							gameRotation.pointedIt().itPP(); // proxima carta do player que it está apontado
+					}
+					while(!gameRotation.pointedIt().hasIt() || cardToLixo);
 					
 					
-					
-					
+					if(!cardToLixo){  // jogador não teve carta para jogar
+						gameRotation.pointedIt().insertNext(Bunch[2].Top());
+						
+						if(lixo.Top().GetValue() == gameRotation.pointedIt().pointedIt().GetValue() || lixo.Top().GetCard() == gameRotation.pointedIt().pointedIt().GetCard()){
+							lixo.push(gameRotation.pointedIt().pointedIt());
+							cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+							cardToLixo = true
+						}
+					}
 				}
+				
+				wayGame = buyCard2 = buyCard3 = false;
+				
+				if(cardToLixo){
+					if(lixo.Top().GetValue() == 'L'){
+						if(wayGame) wayGame = false;
+						else wayGame = true;
+					}else if(lixo.Top().GetValue() == 'A'){
+						NextToNext = true;
+					}else if(lixo.Top().GetValue() == 'G'){
+						buyCard2 = true;
+					}else if(lixo.Top().GetValue() == 'I'){
+						buyCard3 = true;
+					}
+				}
+				
+				if(wayGame){
+					if(NextToNext){
+						gameRotation.itPP(); // proximo do proximo jogador
+						gameRotation.itPP();
+					}
+					else{
+						gameRotation.itPP();
+					}
+					
+				}else{
+					if(NextToNext){
+						gameRotation.itMM(); // anterior do anterior
+						gameRotation.itMM(); 
+					}
+					else{
+						gameRotation.itMM(); // jogador anterior
+					}
+				}
+				 
+				 
+				 // aqui o jogador compra as cartas
+				if(buyCard2){
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+				} 
+				else if(buyCard3){
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+				} 
+				
+				
+		}
+			
+			
+			
 			
 			
 		}
 		
+		gameRotation.begin();
+		
+		while(){ // rotação das cartas
+		
+		/*
+		if(gameRotation.pointedIt().size() == 0){
+			gameRotation.Erase();
+		}
+		*/
+		
+			cardToLixo = false;
+			
+				if(lixo.size() == 0){ // rodada acabou de começar!
+					lixo.push(gameRotation.pointedIt().pointedIt()); // adicionar carta de tal player no lixo
+					gameRotation.pointedIt().Erase();// remove carta do player
+					cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+					cardToLixo = true;
+				}else{
+					
+					do{
+						
+						if(lixo.Top().GetValue() == gameRotation.pointedIt().pointedIt().GetValue() || lixo.Top().GetCard() == gameRotation.pointedIt().pointedIt().GetCard()){
+						
+							lixo.push(gameRotation.pointedIt().pointedIt());
+							cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+							cardToLixo = true;
+						}else
+							gameRotation.pointedIt().itPP(); // proxima carta do player que it está apontado
+					}
+					while(!gameRotation.pointedIt().hasIt() || cardToLixo);
+					
+					
+					if(!cardToLixo){  // jogador não teve carta para jogar
+						gameRotation.pointedIt().insertNext(Bunch[2].Top());
+						
+						if(lixo.Top().GetValue() == gameRotation.pointedIt().pointedIt().GetValue() || lixo.Top().GetCard() == gameRotation.pointedIt().pointedIt().GetCard()){
+							lixo.push(gameRotation.pointedIt().pointedIt());
+							cout<<"Jogador ["<<gameRotation.pointedIt().id<<"] jogou um carta!"<<endl;
+							cardToLixo = true
+						}
+					}
+				}
+				
+				wayGame = buyCard2 = buyCard3 = false;
+				
+				if(cardToLixo){
+					if(lixo.Top().GetValue() == 'L'){
+						if(wayGame) wayGame = false;
+						else wayGame = true;
+					}else if(lixo.Top().GetValue() == 'A'){
+						NextToNext = true;
+					}else if(lixo.Top().GetValue() == 'G'){
+						buyCard2 = true;
+					}else if(lixo.Top().GetValue() == 'I'){
+						buyCard3 = true;
+					}
+				}
+				
+				if(wayGame){
+					if(NextToNext){
+						gameRotation.itPP(); // proximo do proximo jogador
+						gameRotation.itPP();
+					}
+					else{
+						gameRotation.itPP();
+					}
+					
+				}else{
+					if(NextToNext){
+						gameRotation.itMM(); // anterior do anterior
+						gameRotation.itMM(); 
+					}
+					else{
+						gameRotation.itMM(); // jogador anterior
+					}
+				}
+				 
+				 
+				 // aqui o jogador compra as cartas
+				if(buyCard2){
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+				} 
+				else if(buyCard3){
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+					gameRotation.pointedIt().insertNext(Bunch[2].Top());
+				} 
+				
+				
+		}
+		
 	}
 	
-	
 
-	// ultima coisa feita foi indicar qual carta do player é maior no insert e na exclusão
-	
 	return 0;
 	
 }
